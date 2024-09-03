@@ -6,7 +6,7 @@ participant browser
 participant server
 
     browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note
-    activate server
+    Server adds the the new noet to the notes array
     server-->>browser: redirect
     deactivate server
 
