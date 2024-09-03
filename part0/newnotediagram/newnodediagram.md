@@ -31,5 +31,4 @@ sequenceDiagram
     deactivate server
 
     Note right of browser: The browser executes the event handler that renders the notes
-
 ```
