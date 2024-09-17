@@ -1,65 +1,16 @@
 import { useState, useEffect } from "react";
 import phonebookService from "./services/phonebook";
-
-const Person = ({ person, deletePerson }) => {
-  return (
-    <li>
-      {person.name} {person.number}{" "}
-      <button onClick={() => deletePerson(person)}>delete</button>
-    </li>
-  );
-};
-
-const Persons = ({ persons, filter, deletePerson }) => {
-  let filter_lowered = filter.toLowerCase();
-  let filteredPersons = persons.filter((person) =>
-    person.name.toLowerCase().includes(filter_lowered),
-  );
-  const personElem = filteredPersons.map((person) => {
-    return (
-      <Person key={person.name} person={person} deletePerson={deletePerson} />
-    );
-  });
-  return <ul>{personElem}</ul>;
-};
-
-const PersonForm = ({
-  addPerson,
-  newName,
-  handleNameChange,
-  newNum,
-  handleNumChange,
-}) => {
-  return (
-    <form onSubmit={addPerson}>
-      <div>
-        name: <input name="name" value={newName} onChange={handleNameChange} />
-      </div>
-      <div>
-        number:{" "}
-        <input name="number" value={newNum} onChange={handleNumChange} />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  );
-};
-
-const Filter = ({ newFilter, handleFilterChange }) => {
-  return (
-    <div>
-      filter shown with:{" "}
-      <input name="filter" value={newFilter} onChange={handleFilterChange} />
-    </div>
-  );
-};
+import Persons from "./components/Persons";
+import PersonForm from "./components/PersonForm";
+import Filter from "./components/Filter";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNum, setNewNum] = useState("");
   const [filterStr, setNewFilter] = useState("");
+  const [notificationMsgMsg, setNotificationMsgMsg] = useState(null);
 
   useEffect(() => {
     phonebookService.getAll().then((response) => {
@@ -86,14 +37,27 @@ const App = () => {
             setPersons(persons.map((p) => (p.id !== duplicate.id ? p : ret)));
           })
           .catch((error) => {
+            setNotificationMsgMsg({
+              text: `Error updating ${personObject.name}`,
+              type: "error",
+            });
+            setTimeout(() => {
+              setNotificationMsgMsg(null);
+            }, 5000);
             console.log("Error updating person: ", error.message);
-            alert("Error updating person.");
           });
         return false;
       }
     }
 
     phonebookService.create(personObject).then((response) => {
+      setNotificationMsgMsg({
+        text: `Added ${personObject.name}`,
+        type: "notification",
+      });
+      setTimeout(() => {
+        setNotificationMsgMsg(null);
+      }, 5000);
       setPersons(persons.concat(response));
       setNewName("");
       setNewNum("");
@@ -110,8 +74,14 @@ const App = () => {
           setPersons(persons.filter((p) => p.id !== person.id));
         })
         .catch((error) => {
+          setNotificationMsgMsg({
+            text: `${person.name} was already removed from server`,
+            type: "error",
+          });
+          setTimeout(() => {
+            setNotificationMsgMsg(null);
+          }, 5000);
           console.log("Error deleting person: ", error.message);
-          alert("Error deleting person.");
         });
     }
   };
@@ -123,6 +93,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMsgMsg} />
       <Filter newFilter={filterStr} handleFilterChange={handleFilterChange} />
       <h3>Add a new</h3>
       <PersonForm
