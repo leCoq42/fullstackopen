@@ -10,13 +10,20 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNum, setNewNum] = useState("");
   const [filterStr, setNewFilter] = useState("");
-  const [notificationMsgMsg, setNotificationMsgMsg] = useState(null);
+  const [notificationMsg, setNotificationMsg] = useState(null);
 
   useEffect(() => {
     phonebookService.getAll().then((response) => {
       setPersons(response);
     });
   }, []);
+
+  const checkValidationError = (error) => {
+    if (error.response && error.response.status === 400) {
+      return true;
+    }
+    return false;
+  };
 
   const addPerson = (event) => {
     event.preventDefault();
@@ -35,33 +42,64 @@ const App = () => {
           .update(duplicate.id, personObject)
           .then((ret) => {
             setPersons(persons.map((p) => (p.id !== duplicate.id ? p : ret)));
+            setNewName("");
+            setNewNum("");
+            setNotificationMsg({
+              text: `Updated: ${personObject.name}`,
+              type: "notification",
+            });
           })
           .catch((error) => {
-            setNotificationMsgMsg({
-              text: `Error updating ${personObject.name}`,
-              type: "error",
-            });
-            setTimeout(() => {
-              setNotificationMsgMsg(null);
-            }, 5000);
-            console.log("Error updating person: ", error.message);
+            if (checkValidationError(error)) {
+              setNotificationMsg({
+                text: error.response.data.error,
+                type: "error",
+              });
+              console.log(error.response.data.error);
+            } else {
+              setNotificationMsg({
+                text: `Error updating ${personObject.name}`,
+                type: "error",
+              });
+              console.log("Error updating person: ", error.message);
+            }
           });
-        return false;
+        setTimeout(() => {
+          setNotificationMsg(null);
+        }, 5000);
+        return;
       }
     }
 
-    phonebookService.create(personObject).then((response) => {
-      setNotificationMsgMsg({
-        text: `Added ${personObject.name}`,
-        type: "notification",
+    phonebookService
+      .create(personObject)
+      .then((response) => {
+        setPersons(persons.concat(response));
+        setNewName("");
+        setNewNum("");
+        setNotificationMsg({
+          text: `Added: ${personObject.name}`,
+          type: "notification",
+        });
+      })
+      .catch((error) => {
+        if (checkValidationError(error)) {
+          setNotificationMsg({
+            text: error.response.data.error,
+            type: "error",
+          });
+          console.log(error.response.data.error);
+        } else {
+          setNotificationMsg({
+            text: `Error adding ${personObject.name}`,
+            type: "error",
+          });
+          console.log("Error adding person: ", error.message);
+        }
       });
-      setTimeout(() => {
-        setNotificationMsgMsg(null);
-      }, 5000);
-      setPersons(persons.concat(response));
-      setNewName("");
-      setNewNum("");
-    });
+    setTimeout(() => {
+      setNotificationMsg(null);
+    }, 5000);
   };
 
   const deletePerson = (person) => {
@@ -72,17 +110,29 @@ const App = () => {
         .remove(person.id)
         .then(() => {
           setPersons(persons.filter((p) => p.id !== person.id));
+          setNotificationMsg({
+            text: `Deleted: ${person.name}`,
+            type: "notification",
+          });
         })
         .catch((error) => {
-          setNotificationMsgMsg({
-            text: `${person.name} was already removed from server`,
-            type: "error",
-          });
-          setTimeout(() => {
-            setNotificationMsgMsg(null);
-          }, 5000);
-          console.log("Error deleting person: ", error.message);
+          if (!checkValidationError(error)) {
+            setNotificationMsg({
+              text: `${person.name} was already removed from server`,
+              type: "error",
+            });
+            console.log("Error deleting person: ", error.message);
+          } else {
+            setNotificationMsg({
+              text: error.response.data.error,
+              type: "error",
+            });
+            console.log(error.response.data.error);
+          }
         });
+      setTimeout(() => {
+        setNotificationMsg(null);
+      }, 5000);
     }
   };
 
@@ -93,7 +143,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notificationMsgMsg} />
+      <Notification message={notificationMsg} />
       <Filter newFilter={filterStr} handleFilterChange={handleFilterChange} />
       <h3>Add a new</h3>
       <PersonForm
