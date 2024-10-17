@@ -1,16 +1,15 @@
 import diagnoseData from "../../data/diagnoses";
+import { Diagnosis } from "../types";
 
-import { DiagnoseEntry } from "../types";
-
-const getDiagnoses = (): DiagnoseEntry[] => {
+const getDiagnoses = (): Diagnosis[] => {
   return diagnoseData;
 };
 
-const addDiagnose = () => {
-  return null;
-};
+// const addDiagnose = () => {
+//   return null;
+// };
 
 export default {
   getDiagnoses,
-  addDiagnose,
+  // addDiagnose,
 };
