@@ -8,7 +8,10 @@ const patients_1 = __importDefault(require("./routes/patients"));
 const diagnoses_1 = __importDefault(require("./routes/diagnoses"));
 const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
+<<<<<<< HEAD
 app.use(express_1.default.json());
+=======
+>>>>>>> 2a74253c1403fa852ee02e7027b31bbdcaf3db8d
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 const PORT = 3001;
