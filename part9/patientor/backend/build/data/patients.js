@@ -1,11 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-<<<<<<< HEAD
 const utils_1 = require("../src/utils");
 const data = [
-=======
-const patientEntries = [
->>>>>>> 2a74253c1403fa852ee02e7027b31bbdcaf3db8d
     {
         id: "d2773336-f723-11e9-8f0b-362b9e155667",
         name: "John McClane",
@@ -47,12 +43,9 @@ const patientEntries = [
         occupation: "Digital evangelist",
     },
 ];
-<<<<<<< HEAD
 const patientEntries = data.map((obj) => {
     const object = (0, utils_1.toNewPatient)(obj);
     object.id = obj.id;
     return object;
 });
-=======
->>>>>>> 2a74253c1403fa852ee02e7027b31bbdcaf3db8d
 exports.default = patientEntries;
