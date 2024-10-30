@@ -9,6 +9,7 @@ exports.NewPatientSchema = zod_1.z.object({
     ssn: zod_1.z.string(),
     gender: zod_1.z.nativeEnum(types_1.Gender),
     occupation: zod_1.z.string(),
+    entries: zod_1.z.array(zod_1.z.object({})),
 });
 const toNewPatient = (object) => {
     return exports.NewPatientSchema.parse(object);
